@@ -26,11 +26,13 @@ dfBTC['Week'] = dfBTC['Date'].dt.isocalendar().week
 dfBTC['DayOfWeek'] = dfBTC['Date'].dt.dayofweek
 dfBTC['DayOfMonth'] = dfBTC['Date'].dt.day
 
+
 # prev day close price
 dfBTC['PrevClose'] = dfBTC['Close'].shift(1)
 #percetange increase/decrease between close price and nextClose price
 dfBTC['PercentChange'] = ((dfBTC['Close'] - dfBTC['PrevClose']) / dfBTC['PrevClose']) * 100
 
+# CurrentTrend
 #if percentage increase is greater than 0.25% then flag as 2 (bullish)
 #if percentage decrease is less than -0.25 then flag as 1 (bearish)
 #else 0 (neutral)
@@ -38,10 +40,8 @@ dfBTC['PercentChange'] = ((dfBTC['Close'] - dfBTC['PrevClose']) / dfBTC['PrevClo
 conditions = [ dfBTC['PercentChange'] >= 0.25,
                dfBTC['PercentChange'] <= -0.25,
               (dfBTC['PercentChange'] > -0.25) & (dfBTC['PercentChange'] < 0.25) ]
-#define results
 results = [2, 1, 0]
-#create feature
-dfBTC['Trend'] = np.select(conditions, results)
+dfBTC['CurrentTrend'] = np.select(conditions, results)
 
 
 #TA indicators
@@ -54,35 +54,53 @@ dfBTC.ta.macd(close='Close', append=True)
 dfBTC.ta.adx(close='Close', append=True)
 
 
+#overSold
+conditions = [ (dfBTC['RSI14'] < 30) | (dfBTC['MACD_12_26_9'] > dfBTC['MACDs_12_26_9']) ]
+results = [1]
+dfBTC['OverSold'] = np.select(conditions, results)
+
+#overBought
+conditions = [ (dfBTC['RSI14'] > 70) | (dfBTC['MACD_12_26_9'] < dfBTC['MACDs_12_26_9']) ]
+results = [1]
+dfBTC['OverBought'] = np.select(conditions, results)
+
+
+#next day trend
+dfBTC['NextDayTrend'] = dfBTC['CurrentTrend'].shift(-1)
+
+
 #drop all nan values
 dfBTC = dfBTC.dropna()
 
 
 print(dfBTC)
-print(dfBTC['Trend'].value_counts())
+print(dfBTC['CurrentTrend'].value_counts())
+print(dfBTC['OverSold'].value_counts())
+print(dfBTC['OverBought'].value_counts())
 
 
-#price and ema trend
-sns.lineplot(dfBTC, x='Date', y='Close', label='Close')
-sns.lineplot(dfBTC, x='Date', y='EMA200', label='EMA200')
-sns.lineplot(dfBTC, x='Date', y='EMA100', label='EMA100')
-sns.lineplot(dfBTC, x='Date', y='EMA50', label='EMA50')
-sns.lineplot(dfBTC, x='Date', y='EMA20', label='EMA20')
-plt.legend()
-plt.title('Price and EMA trend')
-plt.show()
-
-
-# plot rsi
-sns.lineplot(dfBTC, x='Date', y='RSI14')
-plt.axhline(y=70, color='r', linestyle='-', label='Over valued')
-plt.axhline(y=30, color='g', linestyle='-', label='Under valued')
-plt.legend()
-plt.show()
-
-
-
-#heatmap correlation
+#
+# #price and ema trend
+# sns.lineplot(dfBTC, x='Date', y='Close', label='Close')
+# sns.lineplot(dfBTC, x='Date', y='EMA200', label='EMA200')
+# sns.lineplot(dfBTC, x='Date', y='EMA100', label='EMA100')
+# sns.lineplot(dfBTC, x='Date', y='EMA50', label='EMA50')
+# sns.lineplot(dfBTC, x='Date', y='EMA20', label='EMA20')
+# plt.legend()
+# plt.title('Price and EMA trend')
+# plt.show()
+#
+#
+# # plot rsi
+# sns.lineplot(dfBTC, x='Date', y='RSI14')
+# plt.axhline(y=70, color='r', linestyle='-', label='Over valued - 70')
+# plt.axhline(y=30, color='g', linestyle='-', label='Under valued - 30')
+# plt.title('RSI 14')
+# plt.legend()
+# plt.show()
+#
+#
+# #heatmap correlation
 # corr_matrix = dfBTC.corr(method='spearman')
 # f, ax = plt.subplots(figsize=(16,8))
 # mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
@@ -92,4 +110,5 @@ plt.show()
 # plt.yticks(fontsize=10)
 # plt.title('Feature correlation')
 # plt.show()
+#
 

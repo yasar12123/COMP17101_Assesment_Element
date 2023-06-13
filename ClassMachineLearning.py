@@ -6,21 +6,67 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, matthews_corrcoef
 
-class dataset_features_target(object):
+class ClassMachineLearning(object):
     '''
-    This class can be used to fee in the dataframe, with features and target values, it can then split
-    the x,y, train,test, scale the data using MinMaxScaler (feature range -1, 1). This can then further
-    train models with the data, create predictions and then compares the results.
+    This class can be used to feed in the dataframe, with features and a single target values.
+    This can split into x, y train and x,y test.
+    Scale the x train and test data using MinMaxScaler (feature range 0, 1).
+    label encode y train and test
+    This can then further train models with this transformed data, create predictions and then compares the results.
+    -----------------------------------------------------------------------------------------------------------------
+
+    Attributes
+    ----------
+    dataframe : pandas dataframe
+         a pandas dataframe
+    features : list
+         a list of features for input
+    target : str
+         target feature
+    scalerFeatures : MinMaxScaler
+         from sklearn.preprocessing import MinMaxScaler
+         MinMaxScaler with range from 0 to 1 to scale the features
+    x_train : numpy array
+         x train split and scaled
+    y_train : numpy array
+         y train split and use LabelEncoder to convert categorical variables into numerical form
+    x_test : numpy array
+         x test split and scaled
+    y_test : numpy array
+         y train split and use LabelEncoder to convert categorical variables into numerical form
+    scalerX : scaler of x train
+         The scaler used to fit the x train
+    encoderY : LabelEncoder
+         label encoder used to transform y train and test
+
+
+    Methods
+    -------
+    x_y_train_test_split:
+        returns the x, y train and test.
+
+    inverse_y:
+        returns the original value for the predictions using label encoder
+
+    classification_models:
+        returns the score metrics for the various classification models that have been used
     '''
 
-    def __init__(self, dataframe, features, target):
+    def __init__(self, dataframe, features: list, target: str):
+        """
+        Constructor method for the class: ClassMachineLearning
+        ...
+        :param dataframe : the pandas dataframe to be used
+        :type dataframe: pandas dataframe
+        :param features : list of all the features to be used as the input
+        :type features: list
+        :param target : name of the target variable to be predicted
+        :type target: str
+        """
         self.dataframe = dataframe
         self.features = features
         self.target = target
-        self.dfTrainSplit = []
-        self.dfTestSplit = []
         self.scalerFeatures = MinMaxScaler(feature_range=(0, 1))
-        self.scalerTarget = MinMaxScaler(feature_range=(0, 1))
         self.x_train = []
         self.y_train = []
         self.x_test = []
@@ -29,6 +75,16 @@ class dataset_features_target(object):
         self.encoderY = preprocessing.LabelEncoder()
 
     def x_y_train_test_split(self, split_ratio):
+        """
+        Splits the data using the specified split ratio going to the train,
+        scales the input features and label encodes the target variable.
+        ...
+        :param split_ratio : the split ratio to go towards the train set e.g. 0.8 == 80%
+        :type split_ratio: float
+        ...
+        :return: returns Xtrain, Ytrain, Xtest, Ytest
+        :rtype: numpy arrays
+        """
         #split data
         dataframe = self.dataframe
         split = int(len(dataframe) * split_ratio)
@@ -61,11 +117,32 @@ class dataset_features_target(object):
         return train_X_scaled, train_Y_encoded, test_X_scaled, test_Y_encoded
 
     def inverse_y(self, y):
+        """
+        Inverse the y set i.e. predictions to get the original data
+        ...
+        :param split_ratio : and array of the predicted values
+        :type split_ratio: numpy array
+        ...
+        :return: returns numpy array of the original values
+        :rtype: numpy array
+        """
         encoderY = self.encoderY
         yInversed = encoderY.inverse_transform(y)
         return np.array(yInversed)
 
     def classification_models(self, clf_names, classifiers):
+        """
+        This loops through all the classification models input via the parameters and compares
+        the scores using precision_recall_fscore_support and matthews_corrcoef
+        ...
+        :param clf_names : text name of the machine models e.g. Nearest Neighbors (k=4)
+        :type clf_names: list
+        :param classifiers : machine learning model to be used e.g. KNeighborsClassifier(4)
+        :type classifiers: list
+        ...
+        :return: returns a pandas dataframe with the scores and a list of the predicted values
+        :rtype: pandas dataframe, list
+        """
         xtrain, ytrain, xtest, ytest = self.x_train, self.y_train, self.x_test, self.y_test
         predictions = []
         scores = pd.DataFrame(columns=['name', 'precision (micro)', 'recall (micro)', 'fscore (micro)', 'support (micro)'

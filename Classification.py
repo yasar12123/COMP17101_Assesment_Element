@@ -1,6 +1,6 @@
 #from preProcessData import dfDaily
 from dataPreProcess import dfBTC
-from ClassMachineLearning import dataset_features_target
+from ClassMachineLearning import ClassMachineLearning
 
 import numpy as np
 import seaborn as sns
@@ -20,28 +20,34 @@ from sklearn.linear_model import LogisticRegression
 import xgboost as xgb
 
 
-#split date into x y
-dataset = dataset_features_target(dfBTC, ['RSI14', 'EMA200', 'EMA100', 'EMA50',
-                                          'STOCHk_14_3_3', 'STOCHd_14_3_3',
-                                          'MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9', 'Open'], ['Trend'])
+#specify data into class
+dataset = ClassMachineLearning(dfBTC, ['RSI14', 'EMA200', 'EMA100', 'EMA50',
+                                        'ADX_14', 'DMP_14', 'DMN_14',
+                                        'MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9',
+                                        'OverSold', 'OverBought', 'CurrentTrend'], ['NextDayTrend'])
+
+#split date into x, y train and test
 xtrain, ytrain, xtest, ytest = dataset.x_y_train_test_split(0.8)
 
+#print unique values in y set
 print(np.unique(ytrain))
-print(ytrain)
-# #to get best knn
-# #method 1 sqrt of n
-# k = math.sqrt(len(xtrain))
-# #method 2 error rate
-# error_rate = []
-# for i in range(1,50):
-#     knn = KNeighborsClassifier(n_neighbors=i)
-#     knn.fit(xtrain, ytrain)
-#     pred = knn.predict(xtest)
-#     error_rate.append(np.mean(pred != ytest))
-#
-# plt.figure(figsize=(15,10))
-# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
-# plt.show()
+print(np.unique(ytest))
+
+#to get best knn
+#method 1 sqrt of n
+k = math.sqrt(len(xtrain))
+print(k)
+#method 2 error rate
+error_rate = []
+for i in range(1,50):
+    knn = KNeighborsClassifier(n_neighbors=i)
+    knn.fit(xtrain, ytrain)
+    pred = knn.predict(xtest)
+    error_rate.append(np.mean(pred != ytest))
+
+plt.figure(figsize=(15,10))
+plt.plot(range(1,50),error_rate, marker='o', markersize=9)
+plt.show()
 
 
 
@@ -58,8 +64,7 @@ classifiers = [KNeighborsClassifier(4),
                MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=10000, activation='relu', random_state=123),
                LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=123),
                LinearSVC(multi_class='ovr', class_weight='balanced', random_state=123),
-               xgb.XGBClassifier(objective='multi:softmax', num_class=5) ]
-
+               xgb.XGBClassifier(objective='multi:softmax', num_class=3) ]
 
 clf_names = ["Nearest Neighbors (k=4)",
              "Nearest Neighbors (k=12)",
@@ -75,14 +80,14 @@ clf_names = ["Nearest Neighbors (k=4)",
              "xgb"]
 
 
-#get the scores for the models
+#get the scores and predictions for the models
 scores, predictions = dataset.classification_models(clf_names, classifiers)
 print(scores)
 
 
 # Create bar plot for scores
 ax = plt.gca()
-scores.plot(kind='barh', x='name', y=scores.columns[1:], ax=ax)
+scores.plot(kind='barh', x='Model', y=scores.columns[1:], ax=ax, width=0.9)
 for container in ax.containers:
     ax.bar_label(container)
 plt.legend()
@@ -90,7 +95,7 @@ plt.show()
 
 # Create bar plot for fscore
 ax = plt.gca()
-scores.plot(kind='barh', x='name', y=['fscore (micro)','fscore (macro)'], ax=ax)
+scores.plot(kind='barh', x='Model', y=['fscore (micro)','fscore (macro)'], ax=ax, width=0.9)
 for container in ax.containers:
     ax.bar_label(container)
 plt.legend()
