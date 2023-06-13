@@ -17,8 +17,8 @@ dfSorted = dfBTC.sort_values(by=['Date'], ascending=True)
 dfBTC = dfSorted.reset_index(drop=True)
 
 
+# convert the 'date' column to datetime
 #create date features
-# convert the 'date' column to datetime format
 dfBTC['Date'] = pd.to_datetime(dfBTC["Date"])
 dfBTC['Year'] = dfBTC['Date'].dt.year
 dfBTC['Month'] = dfBTC['Date'].dt.month
@@ -26,19 +26,18 @@ dfBTC['Week'] = dfBTC['Date'].dt.isocalendar().week
 dfBTC['DayOfWeek'] = dfBTC['Date'].dt.dayofweek
 dfBTC['DayOfMonth'] = dfBTC['Date'].dt.day
 
-
-#next day close price
-dfBTC['NextClose'] = dfBTC['Close'].shift(-1)
+# prev day close price
+dfBTC['PrevClose'] = dfBTC['Close'].shift(1)
 #percetange increase/decrease between close price and nextClose price
-dfBTC['NextPercentChange'] = ((dfBTC['NextClose'] - dfBTC['Close']) / dfBTC['Close']) * 100
+dfBTC['PercentChange'] = ((dfBTC['Close'] - dfBTC['PrevClose']) / dfBTC['PrevClose']) * 100
 
 #if percentage increase is greater than 0.25% then flag as 2 (bullish)
 #if percentage decrease is less than -0.25 then flag as 1 (bearish)
 #else 0 (neutral)
 #define conditions
-conditions = [ dfBTC['NextPercentChange'] >= 0.25,
-               dfBTC['NextPercentChange'] <= -0.25,
-              (dfBTC['NextPercentChange'] > -0.25) & (dfBTC['NextPercentChange'] < 0.25) ]
+conditions = [ dfBTC['PercentChange'] >= 0.25,
+               dfBTC['PercentChange'] <= -0.25,
+              (dfBTC['PercentChange'] > -0.25) & (dfBTC['PercentChange'] < 0.25) ]
 #define results
 results = [2, 1, 0]
 #create feature
@@ -46,13 +45,11 @@ dfBTC['Trend'] = np.select(conditions, results)
 
 
 #TA indicators
-dfBTC['RSI14'] = ta.rsi(dfBTC['Close'], 14)
 dfBTC['EMA200'] = ta.ema(dfBTC['Close'], 200)
 dfBTC['EMA100'] = ta.ema(dfBTC['Close'], 100)
 dfBTC['EMA50'] = ta.ema(dfBTC['Close'], 50)
 dfBTC['EMA20'] = ta.ema(dfBTC['Close'], 20)
-dfBTC['EMA10'] = ta.ema(dfBTC['Close'], 10)
-dfBTC.ta.stoch(high='High', low='Low', k=14, d=3, append=True)
+dfBTC['RSI14'] = ta.rsi(dfBTC['Close'], 14)
 dfBTC.ta.macd(close='Close', append=True)
 dfBTC.ta.adx(close='Close', append=True)
 
@@ -61,9 +58,27 @@ dfBTC.ta.adx(close='Close', append=True)
 dfBTC = dfBTC.dropna()
 
 
-# print(dfBTC)
-# print(dfBTC['Trend'].value_counts())
+print(dfBTC)
+print(dfBTC['Trend'].value_counts())
 
+
+#price and ema trend
+sns.lineplot(dfBTC, x='Date', y='Close', label='Close')
+sns.lineplot(dfBTC, x='Date', y='EMA200', label='EMA200')
+sns.lineplot(dfBTC, x='Date', y='EMA100', label='EMA100')
+sns.lineplot(dfBTC, x='Date', y='EMA50', label='EMA50')
+sns.lineplot(dfBTC, x='Date', y='EMA20', label='EMA20')
+plt.legend()
+plt.title('Price and EMA trend')
+plt.show()
+
+
+# plot rsi
+sns.lineplot(dfBTC, x='Date', y='RSI14')
+plt.axhline(y=70, color='r', linestyle='-', label='Over valued')
+plt.axhline(y=30, color='g', linestyle='-', label='Under valued')
+plt.legend()
+plt.show()
 
 
 

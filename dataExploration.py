@@ -48,3 +48,9 @@ plt.title('Feature correlation')
 plt.show()
 
 
+# #price with volume
+# sns.boxplot(data=dfBTC, x='Volume BTC', y='Volume USDT')
+# #sns.scatterplot(data=dfBTC, x='Volume BTC', y= 'Volume USDT', hue='Close')
+# plt.title('Volume distribution')
+# plt.show()
+
