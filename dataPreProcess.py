@@ -43,6 +43,10 @@ conditions = [ dfBTC['PercentChange'] >= 0.25,
 results = [2, 1, 0]
 dfBTC['CurrentTrend'] = np.select(conditions, results)
 
+#Log transform
+dfBTC['Close'] = np.log(dfBTC['Close'])
+dfBTC['Volume BTC'] = np.log(dfBTC['Volume BTC'])
+dfBTC['Volume USDT'] = np.log(dfBTC['Volume USDT'])
 
 #TA indicators
 dfBTC['EMA200'] = ta.ema(dfBTC['Close'], 200)
@@ -53,30 +57,15 @@ dfBTC['RSI14'] = ta.rsi(dfBTC['Close'], 14)
 dfBTC.ta.macd(close='Close', append=True)
 dfBTC.ta.adx(close='Close', append=True)
 
-
-#overSold
-conditions = [ (dfBTC['RSI14'] < 30) | (dfBTC['MACD_12_26_9'] > dfBTC['MACDs_12_26_9']) ]
-results = [1]
-dfBTC['OverSold'] = np.select(conditions, results)
-
-#overBought
-conditions = [ (dfBTC['RSI14'] > 70) | (dfBTC['MACD_12_26_9'] < dfBTC['MACDs_12_26_9']) ]
-results = [1]
-dfBTC['OverBought'] = np.select(conditions, results)
-
-
 #next day trend
 dfBTC['NextDayTrend'] = dfBTC['CurrentTrend'].shift(-1)
-
 
 #drop all nan values
 dfBTC = dfBTC.dropna()
 
-
+#view data
 print(dfBTC)
 print(dfBTC['CurrentTrend'].value_counts())
-print(dfBTC['OverSold'].value_counts())
-print(dfBTC['OverBought'].value_counts())
 
 
 #
@@ -112,3 +101,13 @@ print(dfBTC['OverBought'].value_counts())
 # plt.show()
 #
 
+
+##sub plots of distribution
+# fig, axes = plt.subplots(2, 3)
+# sns.distplot(ax=axes[0, 0], x=dfBTC['Close'])
+# sns.distplot(ax=axes[0, 1], x=dfBTC['EMA200'])
+# sns.distplot(ax=axes[0, 2], x=dfBTC['EMA100'])
+# sns.distplot(ax=axes[1, 0], x=dfBTC['EMA50'])
+# sns.distplot(ax=axes[1, 1], x=dfBTC['LogEMA200'])
+# sns.distplot(ax=axes[1, 2], x=np.log(dfBTC['EMA200']))
+# plt.show()

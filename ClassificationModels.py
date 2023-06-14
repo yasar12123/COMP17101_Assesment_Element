@@ -24,14 +24,19 @@ import xgboost as xgb
 dataset = ClassMachineLearning(dfBTC, ['RSI14', 'EMA200', 'EMA100', 'EMA50',
                                         'ADX_14', 'DMP_14', 'DMN_14',
                                         'MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9',
-                                        'OverSold', 'OverBought', 'CurrentTrend'], ['NextDayTrend'])
+                                        'Volume BTC', 'Volume USDT',
+                                        'CurrentTrend'
+                                       ], ['NextDayTrend'])
 
 #split date into x, y train and test
 xtrain, ytrain, xtest, ytest = dataset.x_y_train_test_split(0.8)
 
 #print unique values in y set
-print(np.unique(ytrain))
-print(np.unique(ytest))
+print(f'Unique values in ytrain: {np.unique(ytrain)}')
+print(f'Unique values in ytest: {np.unique(ytest)}')
+print(f'length of train: {len(xtrain)}')
+print(f'length of test: {len(xtest)}')
+
 
 #to get best knn
 #method 1 sqrt of n
@@ -41,6 +46,7 @@ print(k)
 error_rate = []
 for i in range(1,50):
     knn = KNeighborsClassifier(n_neighbors=i)
+    #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
     knn.fit(xtrain, ytrain)
     pred = knn.predict(xtest)
     error_rate.append(np.mean(pred != ytest))
@@ -102,17 +108,17 @@ plt.legend()
 plt.show()
 
 
-# plot confusion matrix
-# for x in predictions:
-#     cm = confusion_matrix(dataset.inverse_y(ytest),  x[1])
-#     cm_df = pd.DataFrame(cm,
-#                          index=[2, 1, 0],
-#                          columns=['2', '1', '0'])
-#
-#     # Plotting the confusion matrix
-#     plt.figure(figsize=(5, 4))
-#     sns.heatmap(cm_df, annot=True)
-#     plt.title('Confusion Matrix - ' + x[0])
-#     plt.ylabel('Actual Values')
-#     plt.xlabel('Predicted Values')
-#     plt.show()
+#plot confusion matrix
+for x in predictions:
+    cm = confusion_matrix(dataset.inverse_y(ytest),  x[1])
+    cm_df = pd.DataFrame(cm,
+                         index=[2, 1, 0],
+                         columns=['2', '1', '0'])
+
+    # Plotting the confusion matrix
+    plt.figure(figsize=(5, 4))
+    sns.heatmap(cm_df, annot=True)
+    plt.title('Confusion Matrix - ' + x[0])
+    plt.ylabel('Actual Values')
+    plt.xlabel('Predicted Values')
+    plt.show()
