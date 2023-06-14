@@ -10,7 +10,7 @@ class ClassMachineLearning(object):
     '''
     This class can be used to feed in the dataframe, with features and a single target values.
     This can split into x, y train and x,y test.
-    Scale the x train and test data using MinMaxScaler (feature range 0, 1).
+    Scale the x train and test data using MinMaxScaler (feature range -1, 1).
     label encode y train and test
     This can then further train models with this transformed data, create predictions and then compares the results.
     -----------------------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ class ClassMachineLearning(object):
          target feature
     scalerFeatures : MinMaxScaler
          from sklearn.preprocessing import MinMaxScaler
-         MinMaxScaler with range from 0 to 1 to scale the features
+         MinMaxScaler with range from -1 to 1 to scale the features
     x_train : numpy array
          x train split and scaled
     y_train : numpy array
@@ -66,7 +66,7 @@ class ClassMachineLearning(object):
         self.dataframe = dataframe
         self.features = features
         self.target = target
-        self.scalerFeatures = MinMaxScaler(feature_range=(0, 1))
+        self.scalerFeatures = MinMaxScaler(feature_range=(-1, 1))
         self.x_train = []
         self.y_train = []
         self.x_test = []
@@ -145,7 +145,7 @@ class ClassMachineLearning(object):
         """
         xtrain, ytrain, xtest, ytest = self.x_train, self.y_train, self.x_test, self.y_test
         predictions = []
-        scores = pd.DataFrame(columns=['name', 'precision (micro)', 'recall (micro)', 'fscore (micro)', 'support (micro)'
+        scores = pd.DataFrame(columns=['Model', 'precision (micro)', 'recall (micro)', 'fscore (micro)', 'support (micro)'
                                              , 'precision (macro)', 'recall (macro)', 'fscore (macro)', 'support (macro)'
                                              , 'mcc'])
         for name, clf in zip(clf_names, classifiers):
