@@ -2,10 +2,13 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.utils import to_categorical
 from sklearn import preprocessing
 from sklearn import utils
+from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, matthews_corrcoef
 
+from sklearn.feature_selection import RFE
+from operator import itemgetter
 class ClassMachineLearning(object):
     '''
     This class can be used to feed in the dataframe, with features and a single target values.
@@ -50,6 +53,10 @@ class ClassMachineLearning(object):
 
     classification_models:
         returns the score metrics for the various classification models that have been used
+
+    rfe_rank:
+        returns a pandas dataframe with ranked features of importance using RFE
+
     '''
 
     def __init__(self, dataframe, features: list, target: str):
@@ -167,4 +174,35 @@ class ClassMachineLearning(object):
 
         return scores, predictions
 
+
+    def rfe_rank(self, clf_names, classifiers):
+        """
+        This loops through all the classification models input via the parameters and returns a dataframe
+        with ranked features of importance using RFE using the train dataset
+        ...
+        :param clf_names : text name of the machine models e.g. Decision Tree (Max Depth=7)
+        :type clf_names: list
+        :param classifiers : machine learning model to be used e.g. DecisionTreeClassifier(max_depth=7, random_state=123)
+        :type classifiers: list
+        ...
+        :return: returns a pandas dataframe with ranked features of importance using RFE
+        :rtype: pandas dataframe
+        """
+        xtrain, ytrain = self.x_train, self.y_train
+        featureInputCols = self.features
+        dfRanking = pd.DataFrame(columns=['Model', 'Feature', 'Rank'])
+        for name, clf in zip(clf_names, classifiers):
+            print(f'running model: {name}')
+
+            # Recursive Feature Elimination (RFE)
+            n_features_to_select = 1
+            rfe = RFE(clf, n_features_to_select=n_features_to_select)
+            rfe.fit(xtrain, ytrain)
+
+            # rank the features in order of importance
+            for x, y in (sorted(zip(rfe.ranking_, featureInputCols), key=itemgetter(0))):
+                rfeList = [name, y, x]
+                dfRanking.loc[len(dfRanking)] = rfeList
+
+        return dfRanking
 

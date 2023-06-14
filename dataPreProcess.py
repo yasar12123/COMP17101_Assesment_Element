@@ -43,10 +43,18 @@ conditions = [ dfBTC['PercentChange'] >= 0.25,
 results = [2, 1, 0]
 dfBTC['CurrentTrend'] = np.select(conditions, results)
 
+
 #Log transform
+dfBTC['Open'] = np.log(dfBTC['Open'])
+dfBTC['High'] = np.log(dfBTC['High'])
+dfBTC['Low'] = np.log(dfBTC['Low'])
 dfBTC['Close'] = np.log(dfBTC['Close'])
 dfBTC['Volume BTC'] = np.log(dfBTC['Volume BTC'])
 dfBTC['Volume USDT'] = np.log(dfBTC['Volume USDT'])
+dfBTC['PrevClose'] = np.log(dfBTC['PrevClose'])
+dfBTC['PercentChange'] = np.log(dfBTC['PercentChange'])
+dfBTC['tradecount'] = np.log(dfBTC['tradecount'])
+
 
 #TA indicators
 dfBTC['EMA200'] = ta.ema(dfBTC['Close'], 200)
@@ -63,9 +71,9 @@ dfBTC['NextDayTrend'] = dfBTC['CurrentTrend'].shift(-1)
 #drop all nan values
 dfBTC = dfBTC.dropna()
 
-#view data
-print(dfBTC)
-print(dfBTC['CurrentTrend'].value_counts())
+# #view data
+# print(dfBTC)
+# print(dfBTC['CurrentTrend'].value_counts())
 
 
 #
@@ -87,27 +95,59 @@ print(dfBTC['CurrentTrend'].value_counts())
 # plt.title('RSI 14')
 # plt.legend()
 # plt.show()
-#
-#
-# #heatmap correlation
-# corr_matrix = dfBTC.corr(method='spearman')
-# f, ax = plt.subplots(figsize=(16,8))
-# mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-# sns.heatmap(corr_matrix, annot=True, fmt='.2f', linewidth=0.4,
-#             annot_kws={"size": 10}, cmap='coolwarm', ax=ax, mask=mask)
-# plt.xticks(fontsize=10)
-# plt.yticks(fontsize=10)
-# plt.title('Feature correlation')
-# plt.show()
-#
 
 
-##sub plots of distribution
-# fig, axes = plt.subplots(2, 3)
-# sns.distplot(ax=axes[0, 0], x=dfBTC['Close'])
-# sns.distplot(ax=axes[0, 1], x=dfBTC['EMA200'])
-# sns.distplot(ax=axes[0, 2], x=dfBTC['EMA100'])
-# sns.distplot(ax=axes[1, 0], x=dfBTC['EMA50'])
-# sns.distplot(ax=axes[1, 1], x=dfBTC['LogEMA200'])
-# sns.distplot(ax=axes[1, 2], x=np.log(dfBTC['EMA200']))
+
+# #sub plots of distribution
+# fig, axes = plt.subplots(5, 4)
+# sns.distplot(ax=axes[0, 0], x=dfBTC['Open'])
+# axes[0, 0].set_ylabel('Open')
+# sns.distplot(ax=axes[0, 1], x=dfBTC['High'])
+# axes[0, 1].set_ylabel('High')
+# sns.distplot(ax=axes[0, 2], x=dfBTC['Low'])
+# axes[0, 2].set_ylabel('Low')
+# sns.distplot(ax=axes[0, 3], x=dfBTC['Close'])
+# axes[0, 3].set_ylabel('Close')
+# sns.distplot(ax=axes[1, 0], x=dfBTC['Volume BTC'])
+# axes[1, 0].set_ylabel('Volume BTC')
+# sns.distplot(ax=axes[1, 1], x=dfBTC['Volume USDT'])
+# axes[1, 1].set_ylabel('Volume USDT')
+# sns.distplot(ax=axes[1, 2], x=dfBTC['tradecount'])
+# axes[1, 2].set_ylabel('tradecount')
+# sns.distplot(ax=axes[1, 3], x=dfBTC['PrevClose'])
+# axes[1, 3].set_ylabel('PrevClose')
+# sns.distplot(ax=axes[2, 0], x=dfBTC['PercentChange'])
+# axes[2, 0].set_ylabel('PercentChange')
+# sns.distplot(ax=axes[2, 1], x=dfBTC['EMA200'])
+# axes[2, 1].set_ylabel('EMA200')
+# sns.distplot(ax=axes[2, 2], x=dfBTC['EMA100'])
+# axes[2, 2].set_ylabel('EMA100')
+# sns.distplot(ax=axes[2, 3], x=dfBTC['EMA50'])
+# axes[2, 3].set_ylabel('EMA50')
+# sns.distplot(ax=axes[3, 0], x=dfBTC['EMA20'])
+# axes[3, 0].set_ylabel('EMA20')
+# sns.distplot(ax=axes[3, 1], x=dfBTC['RSI14'])
+# axes[3, 1].set_ylabel('RSI14')
+# axes[3, 1].set_yticklabels([])
+# sns.distplot(ax=axes[3, 2], x=dfBTC['MACD_12_26_9'])
+# axes[3, 2].set_ylabel('MACD_12_26_9')
+# axes[3, 2].set_yticklabels([])
+# sns.distplot(ax=axes[3, 3], x=dfBTC['MACDh_12_26_9'])
+# axes[3, 3].set_ylabel('MACDh_12_26_9')
+# axes[3, 3].set_yticklabels([])
+# sns.distplot(ax=axes[4, 0], x=dfBTC['MACDs_12_26_9'])
+# axes[4, 0].set_ylabel('MACDs_12_26_9')
+# axes[4, 0].set_yticklabels([])
+# sns.distplot(ax=axes[4, 1], x=dfBTC['ADX_14'])
+# axes[4, 1].set_ylabel('ADX_14')
+# axes[4, 1].set_yticklabels([])
+# sns.distplot(ax=axes[4, 2], x=dfBTC['DMP_14'])
+# axes[4, 2].set_ylabel('DMP_14')
+# axes[4, 2].set_yticklabels([])
+# sns.distplot(ax=axes[4, 3], x=dfBTC['DMN_14'])
+# axes[4, 3].set_ylabel('DMN_14')
+# axes[4, 3].set_yticklabels([])
+# fig.suptitle('Data distribution post log transform')
 # plt.show()
+
+

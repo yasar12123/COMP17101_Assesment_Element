@@ -9,6 +9,7 @@ import pandas as pd
 import math
 pd.set_option("display.max.columns", None)
 
+from sklearn.dummy import DummyClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -38,28 +39,32 @@ print(f'length of train: {len(xtrain)}')
 print(f'length of test: {len(xtest)}')
 
 
-#to get best knn
-#method 1 sqrt of n
-k = math.sqrt(len(xtrain))
-print(k)
-#method 2 error rate
-error_rate = []
-for i in range(1,50):
-    knn = KNeighborsClassifier(n_neighbors=i)
-    #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
-    knn.fit(xtrain, ytrain)
-    pred = knn.predict(xtest)
-    error_rate.append(np.mean(pred != ytest))
+# #to get best knn
+# #method 1 sqrt of n
+# k = math.sqrt(len(xtrain))
+# print(k)
+# #method 2 error rate
+# error_rate = []
+# for i in range(1,50):
+#     knn = KNeighborsClassifier(n_neighbors=i)
+#     #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
+#     knn.fit(xtrain, ytrain)
+#     pred = knn.predict(xtest)
+#     error_rate.append(np.mean(pred != ytest))
+#
+# plt.figure(figsize=(15,10))
+# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
+# plt.show()
 
-plt.figure(figsize=(15,10))
-plt.plot(range(1,50),error_rate, marker='o', markersize=9)
-plt.show()
 
 
 
 
 #classification models
-classifiers = [KNeighborsClassifier(4),
+classifiers = [DummyClassifier(strategy="most_frequent", random_state=123),
+               DummyClassifier(strategy="stratified", random_state=123),
+               DummyClassifier(strategy="uniform", random_state=123),
+               KNeighborsClassifier(4),
                KNeighborsClassifier(12),
                KNeighborsClassifier(47),
                GaussianNB(),
@@ -72,7 +77,10 @@ classifiers = [KNeighborsClassifier(4),
                LinearSVC(multi_class='ovr', class_weight='balanced', random_state=123),
                xgb.XGBClassifier(objective='multi:softmax', num_class=3) ]
 
-clf_names = ["Nearest Neighbors (k=4)",
+clf_names = ["DummyClassifier - most_frequent",
+             "DummyClassifier - stratified",
+             "DummyClassifier - uniform",
+             "Nearest Neighbors (k=4)",
              "Nearest Neighbors (k=12)",
              "Nearest Neighbors (k=47)",
              "GaussianNB",
@@ -109,16 +117,54 @@ plt.show()
 
 
 #plot confusion matrix
-for x in predictions:
-    cm = confusion_matrix(dataset.inverse_y(ytest),  x[1])
-    cm_df = pd.DataFrame(cm,
-                         index=[2, 1, 0],
-                         columns=['2', '1', '0'])
+# for x in predictions:
+#     cm = confusion_matrix(dataset.inverse_y(ytest),  x[1])
+#     cm_df = pd.DataFrame(cm,
+#                          index=[2, 1, 0],
+#                          columns=['2', '1', '0'])
+#
+#     # Plotting the confusion matrix
+#     plt.figure(figsize=(5, 4))
+#     sns.heatmap(cm_df, annot=True)
+#     plt.title('Confusion Matrix - ' + x[0])
+#     plt.ylabel('Actual Values')
+#     plt.xlabel('Predicted Values')
+#     plt.show()
 
-    # Plotting the confusion matrix
-    plt.figure(figsize=(5, 4))
-    sns.heatmap(cm_df, annot=True)
-    plt.title('Confusion Matrix - ' + x[0])
-    plt.ylabel('Actual Values')
-    plt.xlabel('Predicted Values')
-    plt.show()
+
+
+
+# #method - error rate for DecisionTreeClassifier
+# error_rate = []
+# for i in range(1,50):
+#     model = DecisionTreeClassifier(max_depth=i, random_state=123)
+#     model.fit(xtrain, ytrain)
+#     pred = model.predict(xtest)
+#     error_rate.append(np.mean(pred != ytest))
+# plt.figure(figsize=(15,10))
+# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
+# plt.show()
+#
+# #method - error rate for RandomForestClassifier
+# error_rate = []
+# for i in range(1,50):
+#     model = RandomForestClassifier(max_depth=i)
+#     #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
+#     model.fit(xtrain, ytrain)
+#     pred = model.predict(xtest)
+#     error_rate.append(np.mean(pred != ytest))
+# plt.figure(figsize=(15,10))
+# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
+# plt.show()
+#
+# #method - error rate for RandomForestClassifier
+# error_rate = []
+# for i in range(1,50):
+#     model = RandomForestClassifier(max_depth=i)
+#     #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
+#     model.fit(xtrain, ytrain)
+#     pred = model.predict(xtest)
+#     error_rate.append(np.mean(pred != ytest))
+# plt.figure(figsize=(15,10))
+# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
+# plt.show()
