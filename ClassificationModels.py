@@ -22,11 +22,11 @@ import xgboost as xgb
 
 
 #specify data into class
-dataset = ClassMachineLearning(dfBTC, ['RSI14', 'EMA200', 'EMA100', 'EMA50',
-                                        'ADX_14', 'DMP_14', 'DMN_14',
-                                        'MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9',
-                                        'Volume BTC', 'Volume USDT',
-                                        'CurrentTrend'
+dataset = ClassMachineLearning(dfBTC, ['ADX_14', 'tradecount', 'DMP_14',
+                                       'Volume BTC', 'MACDh_12_26_9', 'DMN_14',
+                                       'PercentChange', 'RSI14', 'EMA200',
+                                       'MACDs_12_26_9', 'MACD_12_26_9', 'Volume USDT',
+                                       'High', 'DayOfMonth'
                                        ], ['NextDayTrend'])
 
 #split date into x, y train and test
@@ -57,47 +57,50 @@ print(f'length of test: {len(xtest)}')
 # plt.show()
 
 
+#classificatoin model to use
+dummyClass = ['most_frequent', 'stratified', 'uniform']
+max_depths = [3, 5, 15]
+n_estimator = [100, 300]
+knc = [3, 9, 20]
+classifiers = []
+clf_names = []
+#insert DummyClassifier
+for i, x in enumerate(dummyClass):
+    classifiers.append(DummyClassifier(strategy=x, random_state=123))
+    clf_names.append(f'DummyClassifier - {x}')
+#insert DecisionTreeClassifiers
+for i, x in enumerate(max_depths):
+    classifiers.append(DecisionTreeClassifier(max_depth=x, random_state=123))
+    clf_names.append(f'DecisionTreeClassifier - max_depth={x}')
+#insert RandomForestClassifiers
+for i, depth in enumerate(max_depths):
+    for ii, estimator in enumerate(n_estimator):
+        classifiers.append(RandomForestClassifier(n_estimators=estimator, max_depth=depth, random_state=123))
+        clf_names.append(f'RandomForestClassifier - n_estimators={estimator}, max_depth={depth}')
+#insert KNeighborsClassifier
+for i, x in enumerate(knc):
+    classifiers.append(KNeighborsClassifier(x))
+    clf_names.append(f'KNeighborsClassifier({x})')
 
-
-
-#classification models
-classifiers = [DummyClassifier(strategy="most_frequent", random_state=123),
-               DummyClassifier(strategy="stratified", random_state=123),
-               DummyClassifier(strategy="uniform", random_state=123),
-               KNeighborsClassifier(4),
-               KNeighborsClassifier(12),
-               KNeighborsClassifier(47),
-               GaussianNB(),
-               DecisionTreeClassifier(max_depth=7, random_state=123),
-               DecisionTreeClassifier(max_depth=60, random_state=123),
-               RandomForestClassifier(n_estimators=1000, max_depth=5, random_state=123),
-               RandomForestClassifier(n_estimators=1000, max_depth=20, random_state=123),
-               MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=10000, activation='relu', random_state=123),
-               LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=123),
-               LinearSVC(multi_class='ovr', class_weight='balanced', random_state=123),
-               xgb.XGBClassifier(objective='multi:softmax', num_class=3) ]
-
-clf_names = ["DummyClassifier - most_frequent",
-             "DummyClassifier - stratified",
-             "DummyClassifier - uniform",
-             "Nearest Neighbors (k=4)",
-             "Nearest Neighbors (k=12)",
-             "Nearest Neighbors (k=47)",
-             "GaussianNB",
-             "Decision Tree (Max Depth=7)",
-             "Decision Tree (Max Depth=60)",
-             "Random Forest (Max Depth=5)",
-             "Random Forest (Max Depth=20)",
-             "MLP (RelU)",
-             "Logistic Regression",
-             "LinearSVC",
-             "xgb"]
+#other models
+classifiers.append(LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=123))
+clf_names.append("Logistic Regression")
+classifiers.append(xgb.XGBClassifier(objective='multi:softmax', num_class=3))
+clf_names.append("xgb")
+classifiers.append(GaussianNB())
+clf_names.append("GaussianNB")
+classifiers.append(MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=10000, activation='relu', random_state=123))
+clf_names.append("MLP (RelU)")
+classifiers.append(LinearSVC(multi_class='ovr', class_weight='balanced', random_state=123))
+clf_names.append("LinearSVC")
 
 
 #get the scores and predictions for the models
 scores, predictions = dataset.classification_models(clf_names, classifiers)
 print(scores)
 
+#sort scores by f1-score (macro)
+scores.sort_values(by=['f1-score (macro)'], ascending=False, inplace=True)
 
 # Create bar plot for scores
 ax = plt.gca()
@@ -107,12 +110,13 @@ for container in ax.containers:
 plt.legend()
 plt.show()
 
-# Create bar plot for fscore
+# Create bar plot for f1-score
 ax = plt.gca()
-scores.plot(kind='barh', x='Model', y=['fscore (micro)','fscore (macro)'], ax=ax, width=0.9)
+scores.plot(kind='barh', x='Model', y=['f1-score (micro)','f1-score (macro)'], ax=ax, width=0.9)
 for container in ax.containers:
     ax.bar_label(container)
 plt.legend()
+plt.title('f1-score comparison')
 plt.show()
 
 
@@ -134,37 +138,3 @@ plt.show()
 
 
 
-# #method - error rate for DecisionTreeClassifier
-# error_rate = []
-# for i in range(1,50):
-#     model = DecisionTreeClassifier(max_depth=i, random_state=123)
-#     model.fit(xtrain, ytrain)
-#     pred = model.predict(xtest)
-#     error_rate.append(np.mean(pred != ytest))
-# plt.figure(figsize=(15,10))
-# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
-# plt.show()
-#
-# #method - error rate for RandomForestClassifier
-# error_rate = []
-# for i in range(1,50):
-#     model = RandomForestClassifier(max_depth=i)
-#     #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
-#     model.fit(xtrain, ytrain)
-#     pred = model.predict(xtest)
-#     error_rate.append(np.mean(pred != ytest))
-# plt.figure(figsize=(15,10))
-# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
-# plt.show()
-#
-# #method - error rate for RandomForestClassifier
-# error_rate = []
-# for i in range(1,50):
-#     model = RandomForestClassifier(max_depth=i)
-#     #knn = DecisionTreeClassifier(max_depth=i, random_state=123)
-#     model.fit(xtrain, ytrain)
-#     pred = model.predict(xtest)
-#     error_rate.append(np.mean(pred != ytest))
-# plt.figure(figsize=(15,10))
-# plt.plot(range(1,50),error_rate, marker='o', markersize=9)
-# plt.show()

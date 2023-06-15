@@ -74,7 +74,7 @@ dfBTC = dfBTC.dropna()
 # #view data
 # print(dfBTC)
 # print(dfBTC['CurrentTrend'].value_counts())
-
+#print(dfBTC.columns)
 
 #
 # #price and ema trend

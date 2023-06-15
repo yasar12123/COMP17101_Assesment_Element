@@ -1,9 +1,7 @@
 from dataPreProcess import dfBTC
 from ClassMachineLearning import ClassMachineLearning
-
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.decomposition import PCA
-
 from matplotlib import pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -62,75 +60,42 @@ for x, y in zip(xtrain, ytrain):
 # plt.show()
 
 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-import xgboost as xgb
+
 
 
 
 # RFE
 #classification models
-max_depths = [5,15,40,80,120]
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+import xgboost as xgb
+max_depths = [5,15,20,40,60,80,100,120]
 n_estimator = [100,200,400,800,1000]
 classifiers = []
 clf_names = []
-#insert DecisionTreeClassifier
+#insert DecisionTreeClassifiers
 for i, x in enumerate(max_depths):
     classifiers.append(DecisionTreeClassifier(max_depth=x, random_state=123))
     clf_names.append(f'DecisionTreeClassifier - max_depth={x}')
-
+#insert RandomForestClassifiers
 for i, depth in enumerate(max_depths):
-    for a, n_estimator in enumerate(n_estimator):
-        print(depth, n_estimator)
+    for a, estimator in enumerate(n_estimator):
+        classifiers.append(RandomForestClassifier(n_estimators=estimator, max_depth=depth, random_state=123))
+        clf_names.append(f'RandomForestClassifier - n_estimators={estimator}, max_depth={depth}')
+classifiers.append(LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=123))
+clf_names.append("Logistic Regression")
+classifiers.append(xgb.XGBClassifier(objective='multi:softmax', num_class=3))
+clf_names.append("xgb")
+#print(classifiers)
+print(clf_names)
 
-    # classifiers.append(DecisionTreeClassifier(max_depth=x, random_state=123))
-    # clf_names.append(f'DecisionTreeClassifier - max_depth={x}')
-
-# print(classifiers)
-# print(clf_names)
-#
-# classifiers = [
-#                DecisionTreeClassifier(max_depth=5, random_state=123),
-#                DecisionTreeClassifier(max_depth=15, random_state=123),
-#                DecisionTreeClassifier(max_depth=40, random_state=123),
-#                DecisionTreeClassifier(max_depth=80, random_state=123),
-#                DecisionTreeClassifier(max_depth=120, random_state=123),
-#                RandomForestClassifier(n_estimators=100, max_depth=5, random_state=123),
-#                RandomForestClassifier(n_estimators=100, max_depth=15, random_state=123),
-#                RandomForestClassifier(n_estimators=100, max_depth=40, random_state=123),
-#                RandomForestClassifier(n_estimators=100, max_depth=80, random_state=123),
-#                RandomForestClassifier(n_estimators=100, max_depth=120, random_state=123),
-#                 RandomForestClassifier(n_estimators=100, max_depth=5, random_state=123),
-#                 RandomForestClassifier(n_estimators=200, max_depth=15, random_state=123),
-#                 RandomForestClassifier(n_estimators=400, max_depth=40, random_state=123),
-#                 RandomForestClassifier(n_estimators=800, max_depth=80, random_state=123),
-#                 RandomForestClassifier(n_estimators=1000, max_depth=120, random_state=123),
-#                LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=123),
-#                xgb.XGBClassifier(objective='multi:softmax', num_class=3)
-#               ]
-#
-# clf_names = [
-#              "Decision Tree (Max Depth=5)",
-#              "Decision Tree (Max Depth=15)",
-#              "Decision Tree (Max Depth=40)",
-#              "Decision Tree (Max Depth=80)",
-#              "Decision Tree (Max Depth=120)",
-#              "Random Forest (Max Depth=5)",
-#              "Random Forest (Max Depth=15)",
-#              "Random Forest (Max Depth=40)",
-#              "Random Forest (Max Depth=80)",
-#              "Random Forest (Max Depth=120)",
-#              "Logistic Regression",
-#              "xgb"
-#              ]
-#
-# #rfe ranking
-# rfeRanking = dataset.rfe_rank(['DecisionTreeClassifier'], [DecisionTreeClassifier(max_depth=4)])
-# rfeRanking['Rank'] = -abs(rfeRanking['Rank'])
-# rfeGroup = rfeRanking.groupby(['Feature'])['Rank'].mean().sort_values()
-# rfeGroup.plot(kind="barh")
-# plt.title('Ranking - Mean feature importance')
-# plt.show()
+#rfe ranking
+rfeRanking = dataset.rfe_rank(clf_names, classifiers)
+rfeRanking['Rank'] = -abs(rfeRanking['Rank'])
+rfeGroup = rfeRanking.groupby(['Feature'])['Rank'].mean().sort_values()
+rfeGroup.plot(kind="barh")
+plt.title('Ranking - Mean feature importance')
+plt.show()
 
 

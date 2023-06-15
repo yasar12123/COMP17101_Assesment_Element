@@ -152,8 +152,8 @@ class ClassMachineLearning(object):
         """
         xtrain, ytrain, xtest, ytest = self.x_train, self.y_train, self.x_test, self.y_test
         predictions = []
-        scores = pd.DataFrame(columns=['Model', 'precision (micro)', 'recall (micro)', 'fscore (micro)', 'support (micro)'
-                                             , 'precision (macro)', 'recall (macro)', 'fscore (macro)', 'support (macro)'
+        scores = pd.DataFrame(columns=['Model', 'precision (micro)', 'recall (micro)', 'f1-score (micro)', 'support (micro)'
+                                             , 'precision (macro)', 'recall (macro)', 'f1-score (macro)', 'support (macro)'
                                              , 'mcc'])
         for name, clf in zip(clf_names, classifiers):
             #fit model get pred
@@ -178,7 +178,7 @@ class ClassMachineLearning(object):
     def rfe_rank(self, clf_names, classifiers):
         """
         This loops through all the classification models input via the parameters and returns a dataframe
-        with ranked features of importance using RFE using the train dataset
+        with ranked features of importance using RFE on the train dataset
         ...
         :param clf_names : text name of the machine models e.g. Decision Tree (Max Depth=7)
         :type clf_names: list
