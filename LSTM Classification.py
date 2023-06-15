@@ -3,7 +3,7 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import LSTM, Bidirectional, Dense, Dropout
-
+from tensorflow import optimizers
 from sklearn.metrics import precision_recall_fscore_support, matthews_corrcoef
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
@@ -16,14 +16,16 @@ import pandas_ta as ta
 
 #paramters for train test window split
 dataframe = dfBTC
-features = ['RSI14', 'EMA200', 'EMA100', 'EMA50',
-            'ADX_14', 'DMP_14', 'DMN_14',
-            'MACD_12_26_9', 'MACDh_12_26_9', 'MACDs_12_26_9',
-            'OverSold', 'OverBought', 'CurrentTrend']
+features = ['ADX_14', 'tradecount', 'DMP_14',
+            'Volume BTC', 'MACDh_12_26_9', 'DMN_14',
+            'PercentChange', 'RSI14', 'EMA200'
+            #'MACDs_12_26_9', 'MACD_12_26_9', 'Volume USDT',
+            #'High', 'DayOfMonth'
+            ]
 target = ['CurrentTrend']
-split_ratio = 0.8  # percentage for training
+split_ratio = 0.6  # percentage for training
 n_future = 1  # Number of days we want to look into the future based on the past days.
-n_past = 14   # Number of past days we want to use to predict the future.
+n_past = 90   # Number of past days we want to use to predict the future.
 
 #train df split
 split = int(len(dataframe) * split_ratio)
@@ -37,7 +39,7 @@ test_X_df = test_split[features]
 test_Y_df = test_split[target]
 
 #scale data using min max scaler
-scalerF = MinMaxScaler(feature_range=(0,1))
+scalerF = MinMaxScaler(feature_range=(-1,1))
 scalerX = scalerF.fit(train_X_df)
 train_X_scaled = scalerX.transform(train_X_df)
 test_X_scaled = scalerX.transform(test_X_df)
@@ -80,17 +82,28 @@ model.add(Dropout(0.2))
 model.add(Bidirectional(LSTM(100, activation='relu')))
 model.add(Dropout(0.2))
 model.add(Dense(ytrain.shape[1], activation='softmax'))
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=optimizers.Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 model.summary()
 
 # Train the model
-history = model.fit(xtrain, ytrain, epochs=50, batch_size=32, validation_split=0.1)
+history = model.fit(xtrain, ytrain, epochs=30, batch_size=32, validation_split=0.1)
 
-#plt training validation
+#plt training validation loss
 plt.plot(history.history['loss'], label='Training loss')
 plt.plot(history.history['val_loss'], label='Validation loss')
+plt.title('BI-LSTM - Training Validation loss')
 plt.legend()
 plt.show()
+
+#plt training validation accuracy
+plt.plot(history.history['categorical_accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_categorical_accuracy'], label='Validation Accuracy')
+plt.title('BI-LSTM - Training Validation Accuracy')
+plt.legend()
+plt.show()
+
+print(history.history.keys())
+
 
 #make predictions and reverse to_categorical labels
 pred = model.predict(xtest)
@@ -117,10 +130,11 @@ scores.plot(kind='barh', x='name', y=scores.columns[1:], ax=ax, figsize=(20,10))
 for container in ax.containers:
     ax.bar_label(container)
 plt.legend()
+plt.title('BI-LSTM - Performance scores')
 plt.show()
 
 #plot confusion matrix
-cm = confusion_matrix(rev_cat_ytest,  y_predictions)
+cm = confusion_matrix(rev_cat_ytest,  y_predictions, labels=[2,1,0])
 cm_df = pd.DataFrame(cm, index=[2, 1, 0], columns=['2', '1', '0'])
 # Plotting the confusion matrix
 plt.figure(figsize=(5, 4))
@@ -129,4 +143,10 @@ plt.title('Confusion Matrix - BI-LSTM')
 plt.ylabel('Actual Values')
 plt.xlabel('Predicted Values')
 plt.show()
+
+
+# #save predictions to csv
+# testDataWithPrediction = test_split[n_past:]
+# testDataWithPrediction['Prediction'] = y_predictions.tolist()
+# testDataWithPrediction.to_csv("LSTM_predictions.csv")
 

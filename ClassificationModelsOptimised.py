@@ -1,7 +1,6 @@
 #from preProcessData import dfDaily
 from dataPreProcess import dfBTC
 from ClassMachineLearning import ClassMachineLearning
-
 import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -11,9 +10,7 @@ pd.set_option("display.max.columns", None)
 
 from sklearn.dummy import DummyClassifier
 from sklearn.metrics import confusion_matrix
-from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
@@ -105,6 +102,7 @@ for x in predictions:
     plt.ylabel('Actual Values')
     plt.xlabel('Predicted Values')
     plt.show()
+
 
 
 
