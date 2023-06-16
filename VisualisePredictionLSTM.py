@@ -12,16 +12,32 @@ conditions = [ df['Prediction'] == 2,
 results = ['Bullish', 'Bearish', 'Neutral']
 df['PredictionLabel'] = np.select(conditions, results)
 
-positive = df[df['Prediction'] == df['NextDayTrend']]
-negatives = df[df['Prediction'] != df['NextDayTrend']]
+positive = df[df['Prediction'] == df['CurrentTrend']]
+positiveBuy = positive[positive['Prediction'] == 1]
+positiveSell = positive[positive['Prediction'] == 2]
+positiveNeutral = positive[positive['Prediction'] == 0]
 
-print(positive)
-print(negatives)
+negatives = df[df['Prediction'] != df['CurrentTrend']]
+negativesBuy = negatives[negatives['Prediction'] == 1]
+negativesSell = negatives[negatives['Prediction'] == 2]
+negativesNeutral = negatives[negatives['Prediction'] == 0]
 
-colors = ['RED']
-sns.lineplot(df, x='Date', y='Close', color='orange')
-sns.scatterplot(positive, x='Date', y='Close' , hue='PredictionLabel', palette=colors)
-sns.scatterplot(negatives, x='Date', y='Close', hue='PredictionLabel', palette=colors)
-plt.title('BTC/USDT - Close price (test split data)')
+
+#correct with close price
+sns.lineplot(df, x='Date', y='Close', color='blue')
+plt.plot(positiveBuy['Close'], linestyle='None', marker='^', color='g', label='Buy Signal')
+plt.plot(positiveSell['Close'], linestyle='None', marker='v', color='r',  label='Sell Signal')
+plt.plot(positiveNeutral['Close'], linestyle='None', marker='.', color='grey',  label='Neutral Signal')
+plt.title('BTC/USDT - Close price (test split data) - Correct prediction')
+plt.legend()
+plt.show()
+
+
+#incorrect with close price
+sns.lineplot(df, x='Date', y='Close', color='blue')
+plt.plot(negativesBuy['Close'], linestyle='None', marker='^', color='g', label='Buy Signal')
+plt.plot(negativesSell['Close'], linestyle='None', marker='v', color='r',  label='Sell Signal')
+plt.plot(negativesNeutral['Close'], linestyle='None', marker='.', color='grey',  label='Neutral Signal')
+plt.title('BTC/USDT - Close price (test split data) - Incorrect prediction')
 plt.legend()
 plt.show()
