@@ -146,7 +146,7 @@ plt.show()
 
 
 # #save predictions to csv
-# testDataWithPrediction = test_split[n_past:]
-# testDataWithPrediction['Prediction'] = y_predictions.tolist()
-# testDataWithPrediction.to_csv("LSTM_predictions.csv")
+testDataWithPrediction = test_split[n_past:]
+testDataWithPrediction['Prediction'] = y_predictions.tolist()
+testDataWithPrediction.to_csv("LSTM_predictions.csv")
 

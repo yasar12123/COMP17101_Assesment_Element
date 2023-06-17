@@ -52,7 +52,7 @@ dfBTC['Close'] = np.log(dfBTC['Close'])
 dfBTC['Volume BTC'] = np.log(dfBTC['Volume BTC'])
 dfBTC['Volume USDT'] = np.log(dfBTC['Volume USDT'])
 dfBTC['PrevClose'] = np.log(dfBTC['PrevClose'])
-dfBTC['PercentChange'] = np.log(dfBTC['PercentChange'])
+#dfBTC['PercentChange'] = np.log(dfBTC['PercentChange'])
 dfBTC['tradecount'] = np.log(dfBTC['tradecount'])
 
 
@@ -75,6 +75,7 @@ dfBTC = dfBTC.dropna()
 # print(dfBTC)
 # print(dfBTC['CurrentTrend'].value_counts())
 #print(dfBTC.columns)
+#print(len(dfBTC))
 
 #
 # #price and ema trend
