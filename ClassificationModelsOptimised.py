@@ -14,13 +14,17 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+import xgboost as xgb
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import LinearSVC
+
 
 #specify data into class
-dataset = ClassMachineLearning(dfBTC, ['ADX_14', 'tradecount', 'DMP_14',
-                                       'Volume BTC', 'MACDh_12_26_9', 'DMN_14',
-                                       'PercentChange', 'RSI14', 'EMA200'
-                                       #'MACDs_12_26_9', 'MACD_12_26_9', 'Volume USDT',
-                                       #'High', 'DayOfMonth'
+dataset = ClassMachineLearning(dfBTC, ['Volume BTC', 'PercentChange', 'MACD_12_26_9',
+                                       'tradecount', 'ADX_14'#, 'DMN_14'
+                                       #'Close', 'MACDh_12_26_9', 'DMP_14'
                                        ], ['NextDayTrend'])
 
 #split date into x, y train and test
@@ -47,18 +51,24 @@ for i, x in enumerate(dummyClass):
 
 
 #other models
-classifiers.append(KNeighborsClassifier(86))
-clf_names.append('KNeighborsClassifier(86)')
+classifiers.append(KNeighborsClassifier(18))
+clf_names.append('KNeighborsClassifier(18)')
+classifiers.append(KNeighborsClassifier(20))
+clf_names.append('KNeighborsClassifier(20)')
 
-classifiers.append(DecisionTreeClassifier(max_depth=3, random_state=123))
-clf_names.append('DecisionTreeClassifier - max_depth=3')
-classifiers.append(DecisionTreeClassifier(max_depth=4, random_state=123))
-clf_names.append('DecisionTreeClassifier - max_depth=4')
+classifiers.append(DecisionTreeClassifier(max_depth=2, random_state=123))
+clf_names.append('DecisionTreeClassifier - max_depth=2')
+classifiers.append(DecisionTreeClassifier(max_depth=10, random_state=123))
+clf_names.append('DecisionTreeClassifier - max_depth=10')
+classifiers.append(DecisionTreeClassifier(max_depth=23, random_state=123))
+clf_names.append('DecisionTreeClassifier - max_depth=23')
 
-classifiers.append(RandomForestClassifier(n_estimators=5, max_depth=300, random_state=123))
-clf_names.append('RandomForestClassifier - n_estimators=5, max_depth=300')
-classifiers.append(RandomForestClassifier(n_estimators=700, max_depth=10, random_state=123))
-clf_names.append('RandomForestClassifier - n_estimators=700, max_depth=10')
+classifiers.append(RandomForestClassifier(n_estimators=5, max_depth=5, random_state=123))
+clf_names.append('RandomForestClassifier - n_estimators=5, max_depth=5')
+classifiers.append(RandomForestClassifier(n_estimators=350, max_depth=50, random_state=123))
+clf_names.append('RandomForestClassifier - n_estimators=350, max_depth=50')
+classifiers.append(RandomForestClassifier(n_estimators=350, max_depth=30, random_state=123))
+clf_names.append('RandomForestClassifier - n_estimators=350, max_depth=30')
 
 
 
@@ -88,21 +98,21 @@ plt.title('f1-score comparison - optimised')
 plt.show()
 
 
-#plot confusion matrix
-for x in predictions:
-    cm = confusion_matrix(dataset.inverse_y(ytest),  x[1])
-    cm_df = pd.DataFrame(cm,
-                         index=[2, 1, 0],
-                         columns=['2', '1', '0'])
-
-    # Plotting the confusion matrix
-    plt.figure(figsize=(5, 4))
-    sns.heatmap(cm_df, annot=True)
-    plt.title('Confusion Matrix - ' + x[0])
-    plt.ylabel('Actual Values')
-    plt.xlabel('Predicted Values')
-    plt.show()
-
+# #plot confusion matrix
+# for x in predictions:
+#     cm = confusion_matrix(dataset.inverse_y(ytest),  x[1])
+#     cm_df = pd.DataFrame(cm,
+#                          index=[2, 1, 0],
+#                          columns=['2', '1', '0'])
+#
+#     # Plotting the confusion matrix
+#     plt.figure(figsize=(5, 4))
+#     sns.heatmap(cm_df, annot=True)
+#     plt.title('Confusion Matrix - ' + x[0])
+#     plt.ylabel('Actual Values')
+#     plt.xlabel('Predicted Values')
+#     plt.show()
+#
 
 
 

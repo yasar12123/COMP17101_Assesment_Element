@@ -6,20 +6,17 @@ import numpy as np
 #read file
 df = pd.read_csv("LSTM_predictions.csv")
 
-conditions = [ df['Prediction'] == 2,
-               df['Prediction'] == 1,
-               df['Prediction'] == 0 ]
-results = ['Bullish', 'Bearish', 'Neutral']
-df['PredictionLabel'] = np.select(conditions, results)
+#next day trend
+df['TrendForNextDay'] = df['CurrentTrend'].shift(-1)
 
-positive = df[df['Prediction'] == df['CurrentTrend']]
-positiveBuy = positive[positive['Prediction'] == 1]
-positiveSell = positive[positive['Prediction'] == 2]
+positive = df[df['Prediction'] == df['TrendForNextDay']]
+positiveBuy = positive[positive['Prediction'] == 2]
+positiveSell = positive[positive['Prediction'] == 1]
 positiveNeutral = positive[positive['Prediction'] == 0]
 
-negatives = df[df['Prediction'] != df['CurrentTrend']]
-negativesBuy = negatives[negatives['Prediction'] == 1]
-negativesSell = negatives[negatives['Prediction'] == 2]
+negatives = df[df['Prediction'] != df['TrendForNextDay']]
+negativesBuy = negatives[negatives['Prediction'] == 2]
+negativesSell = negatives[negatives['Prediction'] == 1]
 negativesNeutral = negatives[negatives['Prediction'] == 0]
 
 

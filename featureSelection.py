@@ -15,7 +15,7 @@ featureInputCols = df.columns.to_list()
 dataset = ClassMachineLearning(dfBTC, featureInputCols, ['NextDayTrend'])
 
 #split date into x, y train and test
-xtrain, ytrain, xtest, ytest = dataset.x_y_train_test_split(0.8)
+xtrain, ytrain, xtest, ytest = dataset.x_y_train_test_split(0.75)
 
 
 #join xtrain with ytrain to df with cols

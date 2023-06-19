@@ -16,16 +16,13 @@ import pandas_ta as ta
 
 #paramters for train test window split
 dataframe = dfBTC
-features = ['ADX_14', 'tradecount', 'DMP_14',
-            'Volume BTC', 'MACDh_12_26_9', 'DMN_14',
-            'PercentChange', 'RSI14', 'EMA200'
-            #'MACDs_12_26_9', 'MACD_12_26_9', 'Volume USDT',
-            #'High', 'DayOfMonth'
+features = ['Volume BTC', 'PercentChange', 'MACD_12_26_9',
+            'tradecount', 'ADX_14'
             ]
 target = ['CurrentTrend']
-split_ratio = 0.6  # percentage for training
+split_ratio = 0.75  # percentage for training
 n_future = 1  # Number of days we want to look into the future based on the past days.
-n_past = 90   # Number of past days we want to use to predict the future.
+n_past = 7   # Number of past days we want to use to predict the future.
 
 #train df split
 split = int(len(dataframe) * split_ratio)
@@ -86,7 +83,7 @@ model.compile(optimizer=optimizers.Adam(learning_rate=0.001), loss='categorical_
 model.summary()
 
 # Train the model
-history = model.fit(xtrain, ytrain, epochs=30, batch_size=32, validation_split=0.1)
+history = model.fit(xtrain, ytrain, epochs=500, batch_size=32, validation_split=0.1)
 
 #plt training validation loss
 plt.plot(history.history['loss'], label='Training loss')

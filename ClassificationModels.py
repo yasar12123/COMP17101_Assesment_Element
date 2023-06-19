@@ -22,11 +22,9 @@ import xgboost as xgb
 
 
 #specify data into class
-dataset = ClassMachineLearning(dfBTC, ['ADX_14', 'tradecount', 'DMP_14',
-                                       'Volume BTC', 'MACDh_12_26_9', 'DMN_14',
-                                       'PercentChange', 'RSI14', 'EMA200',
-                                       'MACDs_12_26_9', 'MACD_12_26_9', 'Volume USDT',
-                                       'High', 'DayOfMonth'
+dataset = ClassMachineLearning(dfBTC, ['Volume BTC', 'PercentChange', 'MACD_12_26_9',
+                                       'tradecount', 'ADX_14', 'DMN_14',
+                                       'Close', 'MACDh_12_26_9', 'DMP_14'
                                        ], ['NextDayTrend'])
 
 #split date into x, y train and test
