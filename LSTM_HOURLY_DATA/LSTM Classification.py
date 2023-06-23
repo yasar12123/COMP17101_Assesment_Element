@@ -1,4 +1,4 @@
-from dataPreProcess import dfBTC
+from dataPreProcessBTC_hr import dfBTC
 from sklearn.preprocessing import MinMaxScaler
 from keras.utils import to_categorical
 from keras.models import Sequential
@@ -22,7 +22,7 @@ features = ['Volume BTC', 'PercentChange', 'MACD_12_26_9',
 target = ['CurrentTrend']
 split_ratio = 0.75  # percentage for training
 n_future = 1  # Number of days we want to look into the future based on the past days.
-n_past = 7   # Number of past days we want to use to predict the future.
+n_past = 24   # Number of past days we want to use to predict the future.
 
 #train df split
 split = int(len(dataframe) * split_ratio)
